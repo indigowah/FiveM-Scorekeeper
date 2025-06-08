@@ -3,10 +3,13 @@ from discord.ext import commands
 
 import logging
 
+import db.sqldb as database
+
 class client(commands.Bot):
     def __init__(self, default_cogs : list[str] = []):
         self.default_cogs = default_cogs
         self.logger = logging.getLogger()
+        self.db : database.ScorekeeperDB = database.ScorekeeperDB()
         intents = discord.Intents.default()
         intents.members = True  # Server Members intent (privileged)
         intents.moderation = True  # Moderation events (ban, kick, etc.)
