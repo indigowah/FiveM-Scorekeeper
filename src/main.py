@@ -29,6 +29,7 @@ if __name__ == "__main__":
     default_cogs = [
         "devtools.ping",
         "devtools.latency",
+        "devtools.cogs",
     ]
     client = bot.client(default_cogs=default_cogs)
     _secret_token = getenv("DISCORD_TOKEN")
