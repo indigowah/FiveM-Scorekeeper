@@ -1,4 +1,4 @@
-from peewee import Model, SqliteDatabase, CharField, IntegerField, IdentityField, ForeignKeyField
+from peewee import Model, SqliteDatabase, CharField, IntegerField, AutoField, ForeignKeyField
 import peewee
 
 # Initialize the database
@@ -9,11 +9,11 @@ class BaseModel(Model):
         database = sqldb
 
 class Gang(BaseModel):
-    id = IdentityField(primary_key=True, auto_increment=True)
+    id = AutoField(primary_key=True) 
     name = CharField(unique=True)
     
 class Duel(BaseModel):
-    id = IdentityField(primary_key=True, auto_increment=True)
+    id = AutoField(primary_key=True)
     attacking_gang = ForeignKeyField(Gang, backref='duels_as_attacker')
     defending_gang = ForeignKeyField(Gang, backref='duels_as_defender')
     attacking_score = IntegerField(default=0)
