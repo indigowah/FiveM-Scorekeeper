@@ -207,6 +207,7 @@ class client(commands.Bot):
         await self.tree.sync()
         
     async def on_ready(self):
+        self.db.initialize_db()
         self.logger.info(f"Logged in as {self.user.name} - {self.user.id}") # type: ignore | self.user is not None unless called manually.
         self.logger.info("Latency: %s", self.latency)
         self.logger.info("Active Commands: %s", len(self.tree.get_commands()))
