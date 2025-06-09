@@ -34,5 +34,32 @@ class CogManager(commands.Cog, name="Cog Manager"):
         except Exception as e:
             await interaction.response.send_message(f"Failed to reload `{extension}`: {e}")
 
+    @command_group.command(name="batch_reload", description="Reload multiple cogs (comma-separated)")
+    async def batch_reload(self, interaction: discord.Interaction, extensions: str):
+        cogs = [e.strip() for e in extensions.split(",") if e.strip()]
+        try:
+            await self.bot.batch_cog_reload(cogs)
+            await interaction.response.send_message(f"Batch reloaded: {', '.join(f'`{c}`' for c in cogs)}.")
+        except Exception as e:
+            await interaction.response.send_message(f"Batch reload failed: {e}")
+
+    @command_group.command(name="batch_load", description="Load multiple cogs (comma-separated)")
+    async def batch_load(self, interaction: discord.Interaction, extensions: str):
+        cogs = [e.strip() for e in extensions.split(",") if e.strip()]
+        try:
+            await self.bot.batch_cog_enable(cogs)
+            await interaction.response.send_message(f"Batch loaded: {', '.join(f'`{c}`' for c in cogs)}.")
+        except Exception as e:
+            await interaction.response.send_message(f"Batch load failed: {e}")
+
+    @command_group.command(name="batch_unload", description="Unload multiple cogs (comma-separated)")
+    async def batch_unload(self, interaction: discord.Interaction, extensions: str):
+        cogs = [e.strip() for e in extensions.split(",") if e.strip()]
+        try:
+            await self.bot.batch_cog_disable(cogs)
+            await interaction.response.send_message(f"Batch unloaded: {', '.join(f'`{c}`' for c in cogs)}.")
+        except Exception as e:
+            await interaction.response.send_message(f"Batch unload failed: {e}")
+
 async def setup(bot : client):
     await bot.add_cog(CogManager(bot))
