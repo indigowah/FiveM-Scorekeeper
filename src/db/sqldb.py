@@ -21,8 +21,8 @@ class Duel(BaseModel):
 
 class ScorekeeperDB:
     def __init__(self):
-        self.gang = self.GangOps()
-        self.duel = self.DuelOps()
+        self.gang = self.GangOps(self)
+        self.duel = self.DuelOps(self)
 
     def initialize_db(self):
         """Initialize the database and create tables if they do not exist."""
@@ -39,6 +39,9 @@ class ScorekeeperDB:
             print("Database connection is already closed.")
 
     class GangOps:
+        def __init__(self, db: 'ScorekeeperDB'):
+            self.db = db
+
         def create(self, name: str) -> Gang:
             """Create a new gang with the given name."""
             if name.strip() == "":
@@ -81,11 +84,14 @@ class ScorekeeperDB:
             return gang  # type: ignore
 
     class DuelOps:
-        def create(self, attacking_gang: Gang, defending_gang: Gang) -> Duel:
+        def __init__(self, db: 'ScorekeeperDB'):
+            self.db = db
+
+        def create(self, attacking_gang: Gang, attacking_score: int, defending_gang: Gang, defending_score: int) -> Duel:
             """Create a new duel between two gangs."""
             if attacking_gang == defending_gang:
                 raise ValueError("A gang cannot duel itself.")
-            return Duel.create(attacking_gang=attacking_gang, defending_gang=defending_gang)  # type: ignore
+            return Duel.create(attacking_gang=attacking_gang, defending_gang=defending_gang, attacking_score=attacking_score, defending_score=defending_score)  # type: ignore
 
         def delete(self, duel: Duel) -> None:
             """Delete a duel from the database."""
