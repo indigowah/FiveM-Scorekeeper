@@ -5,9 +5,153 @@ import logging
 
 import db.sqldb as database
 
+import json
+
+class Config:
+    """
+    Configuration class for the bot.
+    
+    This class is used to store configuration settings for the bot, such as default cogs.
+    It inherits from Dict to allow easy access to configuration values.
+    
+    Attributes:
+        default_cogs (list): A list of default cogs to be loaded when the bot starts.
+    """
+    default_cogs: list[str] = []
+    class debug:
+        """
+        Configuration for debug-related settings.
+        
+        Attributes:
+            enabled (bool): Whether debug mode is enabled.
+            debug_commands (bool): Whether debug commands are enabled.
+            debug_cogs (list[str]): A list of cogs to be loaded in debug mode.
+        """
+        enabled: bool = False
+        debug_commands: bool = False
+        debug_cogs: list[str] = ["devtools.ping", "devtools.latency", "devtools.cogs"]
+    class gangs:
+        """
+        Configuration for gang-related settings.
+        
+        Attributes:
+            max_gangs (int): The maximum number of gangs allowed.
+            max_members_per_gang (int): The maximum number of members allowed in a gang.
+            max_gangs_per_user (int): The maximum number of gangs a user can be part of.
+        """
+        name_length_limit: int = 20
+        max_gangs: int = 100
+    class war:
+        """
+        Configuration for war-related settings.
+        
+        Attributes:
+            max_wars (int): The maximum number of wars allowed.
+            max_wars_per_gang (int): The maximum number of wars a gang can be involved in.
+        """
+        updates: bool = False
+        update_channel_id: int = 0
+
+    def json_to_dict(self, json_str: str):
+        """
+        Convert a JSON string to a dictionary and import configuration settings.
+        
+        Args:
+            json_str (str): A JSON string containing configuration settings.
+        Returns:
+            None
+        """
+        import json
+        config_dict = json.loads(json_str)
+        self.import_from_dict(config_dict)
+        
+    def dict_to_json(self, config_dict: dict) -> str:
+        """
+        Convert a dictionary to a JSON string.
+        
+        Args:
+            config_dict (dict): A dictionary containing configuration settings.
+        Returns:
+            str: A JSON string representation of the configuration settings.
+        """
+        import json
+        return json.dumps(config_dict, indent=4)
+ 
+    def import_from_dict(self, config_dict: dict):
+        """
+        Import configuration settings from a dictionary.
+        
+        Args:
+            config_dict (dict): A dictionary containing configuration settings.
+        Returns:
+            None
+        """
+        self.default_cogs = config_dict.get("default_cogs", [])
+        debug_config = config_dict.get("debug", {})
+        self.debug.enabled = debug_config.get("enabled", False)
+        self.debug.debug_commands = debug_config.get("debug_commands", False)
+        self.debug.debug_cogs = debug_config.get("debug_cogs", [])
+        gangs_config = config_dict.get("gangs", {})
+        self.gangs.name_length_limit = gangs_config.get("name_length_limit", 20)
+        self.gangs.max_gangs = gangs_config.get("max_gangs", 100)
+        war_config = config_dict.get("war", {})
+        self.war.updates = war_config.get("updates", False)
+        self.war.update_channel_id = war_config.get("update_channel_id", 0)
+            
+    def export_to_dict(self) -> dict:
+        """
+        Export configuration settings to a dictionary.
+        
+        Returns:
+            dict: A dictionary containing the configuration settings.
+        """
+        dict = {
+            "default_cogs": self.default_cogs,
+            "debug": {
+                "enabled": self.debug.enabled,
+                "debug_commands": self.debug.debug_commands,
+                "debug_cogs": self.debug.debug_cogs
+            },
+            "gangs": {
+                "name_length_limit": self.gangs.name_length_limit,
+                "max_gangs": self.gangs.max_gangs
+            },
+            "war": {
+                "updates": self.war.updates,
+                "update_channel_id": self.war.update_channel_id
+            }
+        }
+                
+        return dict
+    
+    def store_to_file(self, file_path: str):
+        """
+        Store the configuration settings to a file.
+        
+        Args:
+            file_path (str): The path to the file where the configuration will be stored.
+        Returns:
+            None
+        """
+        with open(file_path, 'w') as f:
+            f.write(self.dict_to_json(self.export_to_dict()))
+            
+    def load_from_file(self, file_path: str):
+        """
+        Load configuration settings from a file.
+        
+        Args:
+            file_path (str): The path to the file from which the configuration will be loaded.
+        Returns:
+            None
+        """
+        with open(file_path, 'r') as f:
+            config_dict = json.load(f)
+            self.import_from_dict(config_dict)
+
 class client(commands.Bot):
-    def __init__(self, default_cogs : list[str] = []):
-        self.default_cogs = default_cogs
+    def __init__(self, config: Config):
+        self.config = config
         self.logger = logging.getLogger()
         self.db : database.ScorekeeperDB = database.ScorekeeperDB()
         intents = discord.Intents.default()
@@ -220,4 +364,4 @@ class client(commands.Bot):
         await self.change_presence(activity=discord.Game(name="f!help"), status=discord.Status.dnd)
         self.logger.debug("Presence set to 'Playing f!help' with DND status.")
         self.logger.info("Bot is ready.")
-        await self.batch_cog_enable(self.default_cogs)
+        await self.batch_cog_enable(self.config.default_cogs + (self.config.debug.debug_cogs if self.config.debug.enabled else []))

@@ -25,13 +25,12 @@ if __name__ == "__main__":
             logger.propagate = False
 
     load_dotenv()
+
+    config = bot.Config()
     
-    default_cogs = [
-        "devtools.ping",
-        "devtools.latency",
-        "devtools.cogs",
-    ]
-    client = bot.client(default_cogs=default_cogs)
+    config.load_from_file("config.json")
+    
+    client = bot.client(config=config)
     _secret_token = getenv("DISCORD_TOKEN")
     if not _secret_token:
         raise ValueError("DISCORD_TOKEN environment variable not set.")

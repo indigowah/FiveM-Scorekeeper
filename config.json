@@ -1,0 +1,21 @@
+{
+    "default_cogs": [],
+    "debug": {
+        "enabled": true,
+        "debug_commands": true,
+        "debug_cogs": [
+            "devtools.ping",
+            "devtools.latency",
+            "devtools.cogs",
+            "devtools.database"
+        ]
+    },
+    "gangs": {
+        "name_length_limit": 20,
+        "max_gangs": 100
+    },
+    "war": {
+        "updates": false,
+        "update_channel_id": 0
+    }
+}
